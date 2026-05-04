@@ -5,6 +5,15 @@ import { MatchRepository, PredictionRepository } from '@/infrastructure/database
 import { CreatePredictionUseCase, UpdateMatchResultUseCase } from '@/application/use-cases';
 import { createPredictionSchema, updateMatchResultSchema } from '@/application/schemas';
 
+const updatePredictionParamsSchema = z.object({
+  id: z.coerce.number().positive(),
+});
+
+const updatePredictionBodySchema = z.object({
+  homeGuess: z.number().min(0, "Gols não podem ser negativos"),
+  awayGuess: z.number().min(0, "Gols não podem ser negativos"),
+});
+
 export class PredictionController {
   async create(request: FastifyRequest, reply: FastifyReply) {
     try {
@@ -21,6 +30,30 @@ export class PredictionController {
       });
 
       return reply.status(201).send(result);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) return reply.status(400).send({ errors: JSON.parse(error.message) });
+
+      return reply.status(400).send({ message: error.message });
+    }
+  }
+
+  async update(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const { id } = updatePredictionParamsSchema.parse(request.params);
+      const { homeGuess, awayGuess } = updatePredictionBodySchema.parse(request.body);
+      const user = request.user as { id: string };
+
+      const predictionRepo = new PredictionRepository(db);
+      const matchRepo = new MatchRepository(db);
+
+      const existing = await predictionRepo.findByUserGroupAndMatch(user.id, '', 0);
+      if (!existing) {
+        return reply.status(404).send({ message: 'Palpite não encontrado.' });
+      }
+
+      await predictionRepo.updateById(id, homeGuess, awayGuess);
+
+      return reply.status(200).send({ message: 'Palpite atualizado com sucesso.', success: true });
     } catch (error: any) {
       if (error instanceof z.ZodError) return reply.status(400).send({ errors: JSON.parse(error.message) });
 

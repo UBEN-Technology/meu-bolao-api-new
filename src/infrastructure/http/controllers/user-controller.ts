@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { db } from '../../database/connection';
 import { UserRepository } from '@/infrastructure/database/mysql';
 import { ListUsersUseCase, PromoteUserToAdminUseCase, RegisterUserUseCase, ToggleUserStatusUseCase } from '@/application/use-cases';
-import { createUserSchema, promoteUserSchema, toggleUserStatusSchema } from '@/application/schemas';
+import { createUserSchema, promoteUserSchema, toggleUserStatusSchema, updateMeSchema } from '@/application/schemas';
 import { logAction } from '../middlewares/log-action-middleware';
 
 export class UserController {
@@ -72,6 +72,59 @@ export class UserController {
 
       return reply.status(200).send({ 
         message: `Conta de utilizador ${statusMessage} com sucesso.` 
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) return reply.status(400).send({ errors: JSON.parse(error.message) });
+
+      return reply.status(400).send({ message: error.message });
+    }
+  }
+
+  async getMe(request: FastifyRequest, reply: FastifyReply) {
+    const repo = new UserRepository(db);
+
+    try {
+      const user = request.user as { id: string };
+      const userData = await repo.findById(user.id);
+
+      if (!userData) {
+        return reply.status(404).send({ message: "Utilizador não encontrado." });
+      }
+
+      const isAdmin = await repo.isAdmin(user.id);
+
+      return reply.status(200).send({
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        isAdmin
+      });
+    } catch (error: any) {
+      return reply.status(400).send({ message: error.message });
+    }
+  }
+
+  async updateMe(request: FastifyRequest, reply: FastifyReply) {
+    const repo = new UserRepository(db);
+
+    try {
+      const user = request.user as { id: string };
+      const validatedData = updateMeSchema.parse(request.body);
+
+      await repo.update(user.id, validatedData);
+
+      const userData = await repo.findById(user.id);
+      const isAdmin = await repo.isAdmin(user.id);
+
+      if (!userData) {
+        return reply.status(404).send({ message: "Utilizador não encontrado." });
+      }
+
+      return reply.status(200).send({
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        isAdmin
       });
     } catch (error: any) {
       if (error instanceof z.ZodError) return reply.status(400).send({ errors: JSON.parse(error.message) });

@@ -9,4 +9,5 @@ export async function privatePredictionRoutes(app: FastifyInstance) {
   app.addHook('preHandler', authenticate);
 
   app.post('/', predictionController.create);
+  app.put('/:id', predictionController.update);
 }

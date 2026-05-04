@@ -10,8 +10,10 @@ export async function privateGroupRoutes(app: FastifyInstance) {
   app.post('/', groupController.create);
   app.get('/public', groupController.listPublic);
   app.get('/me', groupController.listMyGroups);
+  app.get('/mine', groupController.listMyGroups);
   app.post('/join', groupController.join);
   app.get('/:groupId/ranking', groupController.getRanking);
   app.get('/:groupId/matches', groupController.getMatches);
   app.get('/:groupId/members', groupController.listMembers);
+  app.get('/:groupId/prize-pool', groupController.getPrizePool);
 }

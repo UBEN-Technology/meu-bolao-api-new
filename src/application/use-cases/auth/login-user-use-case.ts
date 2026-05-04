@@ -16,6 +16,10 @@ export class LoginUserUseCase {
       throw new Error("E-mail ou palavra-passe inválidos.");
     }
 
+    if (!user.emailConfirmed) {
+      throw new Error("E-mail não confirmado. Por favor, verifique a sua caixa de entrada.");
+    }
+
     const passwordMatch = await bcrypt.compare(password, user.passwordHash);
 
     if (!passwordMatch) {

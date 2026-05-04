@@ -8,5 +8,5 @@ export async function privateMatchRoutes(app: FastifyInstance) {
   // Todas as rotas aqui requerem autenticação e privilégio de admin
   app.addHook('preHandler', authenticate);
 
-  app.get('/championship/:championshipId', matchController.listMatches);
+  app.get('/:championshipId', matchController.listMatches);
 }

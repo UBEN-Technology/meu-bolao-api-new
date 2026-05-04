@@ -156,5 +156,28 @@ export class GroupController {
       
       return reply.status(400).send({ message: error.message });
     }
-  }  
+  }
+
+  async getPrizePool(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const { groupId } = groupIdParamsSchema.parse(request.params);
+
+      const prizeRepo = new GroupPrizeRepository(db);
+      const prize = await prizeRepo.findByGroupId(groupId);
+
+      if (!prize) {
+        return reply.status(200).send({});
+      }
+
+      return reply.status(200).send({
+        firstPlacePct: prize.firstPlacePct,
+        secondPlacePct: prize.secondPlacePct,
+        thirdPlacePct: prize.thirdPlacePct,
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) return reply.status(400).send({ errors: JSON.parse(error.message) });
+
+      return reply.status(400).send({ message: error.message });
+    }
+  }
 }

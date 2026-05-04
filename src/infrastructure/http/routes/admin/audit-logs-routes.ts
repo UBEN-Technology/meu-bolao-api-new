@@ -9,5 +9,5 @@ export async function adminAuditLogsRoutes(app: FastifyInstance) {
   app.addHook('preHandler', checkAdmin);
 
   // Auditoria (Nova Rota)
-  app.get('/audit-logs', auditLogsController.listAuditLogs);
+  app.get('/', auditLogsController.listAuditLogs);
 }

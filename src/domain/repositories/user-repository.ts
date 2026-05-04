@@ -8,4 +8,7 @@ export interface IUserRepository {
     promoteToAdmin(userId: string, level: 'super_admin' | 'moderator'): Promise<void>;
     findAll(): Promise<User[]>;
     updateStatus(userId: string, isActive: boolean): Promise<void>;
+    update(userId: string, data: { name?: string; pictureUrl?: string }): Promise<void>;
+    updatePassword(userId: string, passwordHash: string): Promise<void>;
+    updateEmailConfirmed(userId: string, confirmed: boolean): Promise<void>;
 }

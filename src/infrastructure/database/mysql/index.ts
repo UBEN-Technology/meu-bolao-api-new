@@ -7,3 +7,6 @@ export * from './prediction-repository';
 export * from './wallet-repository';
 export * from './audit-log-repository';
 export * from './group-prize-repository';
+export * from './token-blacklist-repository';
+export * from './password-reset-token-repository';
+export * from './email-confirmation-token-repository';

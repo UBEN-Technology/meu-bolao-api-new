@@ -13,7 +13,8 @@ export class CreateChampionshipUseCase {
     const championship = new Championship({
       title,
       description,
-      isActive: true
+      isActive: true,
+      status: 'active'
     });
 
     await this.championshipRepository.create(championship);

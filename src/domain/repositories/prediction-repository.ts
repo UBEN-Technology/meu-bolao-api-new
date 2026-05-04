@@ -5,7 +5,8 @@ export interface IPredictionRepository {
   findByUserGroupAndMatch(userId: string, groupId: string, matchId: number): Promise<Prediction | null>;
   isUserInGroup(userId: string, groupId: string): Promise<boolean>;
   listByMatch(matchId: number): Promise<Prediction[]>;
-  updatePoints(predictionId: number, points: number): Promise<void>;  
+  updatePoints(predictionId: number, points: number): Promise<void>;
+  updateById(id: number, homeGuess: number, awayGuess: number): Promise<void>;
   getGroupRanking(groupId: string): Promise<{
     userId: string;
     userName: string;

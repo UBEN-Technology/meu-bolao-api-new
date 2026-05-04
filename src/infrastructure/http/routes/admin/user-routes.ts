@@ -9,6 +9,6 @@ export async function adminUserRoutes(app: FastifyInstance) {
   app.addHook('preHandler', checkAdmin);  
 
   app.get('/', userController.listUsers);
-  app.post('/promote-user', userController.promoteUser);
+  app.post('/promote', userController.promoteUser);
   app.patch('/status', userController.toggleUserStatus);
 }

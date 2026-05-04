@@ -21,7 +21,7 @@ export class RegisterUserUseCase {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const user = new User({ name, email, passwordHash }, uuidv4());
+    const user = new User({ name, email, passwordHash, emailConfirmed: false }, uuidv4());
 
     await this.userRepository.save(user);
 

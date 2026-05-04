@@ -65,6 +65,12 @@ export class PredictionRepository implements IPredictionRepository {
       .update({ points_earned: points });
   }
 
+  async updateById(id: number, homeGuess: number, awayGuess: number): Promise<void> {
+    await this.db("predictions")
+      .where({ id })
+      .update({ home_guess: homeGuess, away_guess: awayGuess });
+  }
+
   async getGroupRanking(groupId: string) {
     // Query complexa para somar pontos e contar acertos exatos (10 pontos)
     const rows = await this.db("predictions as p")

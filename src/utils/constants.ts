@@ -2,7 +2,7 @@ import 'dotenv/config';
 
 export const ENVS = {
   CONFIG: {
-    JWT_SECRET: process.env.JWT_SECRET || 'meu-bolao-secret-key',
+    JWT_SECRET: process.env.JWT_SECRET!,
     PORT: Number(process.env.PORT) || 3000,
     DB: {
       HOST: process.env.DB_HOST || 'localhost',
@@ -23,4 +23,4 @@ export const ENVS = {
   PRIZES: {
     TOTAL: Number(process.env.TOTAL_PRIZE) || 100,
   }
-}
+};

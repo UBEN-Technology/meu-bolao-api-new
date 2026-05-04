@@ -8,5 +8,5 @@ export async function privateTeamRoutes(app: FastifyInstance) {
   app.addHook('preHandler', authenticate);
 
   // Equipes
-  app.get('/championship/:championshipId', teamController.listTeamsByChampionship);
+  app.get('/:championshipId', teamController.listTeamsByChampionship);
 }

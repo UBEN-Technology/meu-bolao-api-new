@@ -6,11 +6,11 @@ const config: { [key: string]: Knex.Config } = {
   production: {
     client: "mysql2",
     connection: {
-      host: ENVS.CONFIG.DB.HOST || "main-database.cvc0ua8ketpm.us-east-2.rds.amazonaws.com",
-      user: ENVS.CONFIG.DB.USER || "admin",
-      port: Number(ENVS.CONFIG.DB.PORT) || 3306,
-      password: ENVS.CONFIG.DB.PASSWORD || "D263qkGV2UgRKMX",
-      database: ENVS.CONFIG.DB.NAME || "meubolao-database",
+      host: ENVS.CONFIG.DB.HOST,
+      user: ENVS.CONFIG.DB.USER,
+      port: Number(ENVS.CONFIG.DB.PORT),
+      password: ENVS.CONFIG.DB.PASSWORD,
+      database: ENVS.CONFIG.DB.NAME,
     }
   },
 };

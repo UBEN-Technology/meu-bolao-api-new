@@ -15,3 +15,8 @@ export const toggleUserStatusSchema = z.object({
   userId: z.uuid("ID de utilizador inválido"),
   isActive: z.boolean("O estado (isActive) é obrigatório"),
 });
+
+export const updateMeSchema = z.object({
+  name: z.string().optional(),
+  pictureUrl: z.string().optional(),
+});

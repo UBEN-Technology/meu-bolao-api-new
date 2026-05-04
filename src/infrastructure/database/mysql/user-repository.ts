@@ -18,14 +18,18 @@ export class UserRepository implements IUserRepository {
   }
 
   async save(user: User): Promise<void> {
-    await this.db("users").insert({
+    const insertData: any = {
       id: user.id,
       name: user.name,
       email: user.email,
       password: user.passwordHash,
       created_at: user.createdAt,
-      is_active: true // Por padrão, utilizadores novos são ativos
-    });
+      is_active: user.isActive,
+      email_confirmed: user.emailConfirmed,
+    };
+    if (user.pictureUrl) insertData.picture_url = user.pictureUrl;
+
+    await this.db("users").insert(insertData);
   }
 
   async isAdmin(userId: string): Promise<boolean> {
@@ -63,22 +67,44 @@ export class UserRepository implements IUserRepository {
       .update({ is_active: isActive });
   }
 
+  async update(userId: string, data: { name?: string; pictureUrl?: string }): Promise<void> {
+    const updateData: any = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.pictureUrl !== undefined) updateData.picture_url = data.pictureUrl;
+
+    await this.db("users")
+      .where({ id: userId })
+      .update(updateData);
+  }
+
+  async updatePassword(userId: string, passwordHash: string): Promise<void> {
+    await this.db("users")
+      .where({ id: userId })
+      .update({ password: passwordHash });
+  }
+
+  async updateEmailConfirmed(userId: string, confirmed: boolean): Promise<void> {
+    await this.db("users")
+      .where({ id: userId })
+      .update({ email_confirmed: confirmed });
+  }
+
   /**
    * Helper para converter o registo da base de dados na entidade de domínio
    */
   private mapToEntity(row: any): User {
-    const user = new User(
+    return new User(
       {
         name: row.name,
         email: row.email,
         passwordHash: row.password,
+        isActive: row.is_active,
+        emailConfirmed: row.email_confirmed,
+        pictureUrl: row.picture_url,
+        updatedAt: row.updated_at ? new Date(row.updated_at) : undefined,
       },
       row.id,
       new Date(row.created_at)
     );
-    
-    // Podemos anexar propriedades extras se necessário, 
-    // ou expandir a entidade User para incluir o campo isActive
-    return user;
   }
 }
