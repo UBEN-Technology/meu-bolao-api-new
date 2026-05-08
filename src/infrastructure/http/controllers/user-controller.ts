@@ -92,12 +92,14 @@ export class UserController {
       }
 
       const isAdmin = await repo.isAdmin(user.id);
+      const role = await repo.getRoleAdmin(user.id);
 
       return reply.status(200).send({
         id: userData.id,
         name: userData.name,
         email: userData.email,
-        isAdmin
+        isAdmin,
+        role
       });
     } catch (error: any) {
       return reply.status(400).send({ message: error.message });

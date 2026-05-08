@@ -39,6 +39,13 @@ export class UserRepository implements IUserRepository {
     return !!row;
   }
 
+  async getRoleAdmin(userId: string): Promise<'super_admin' | 'moderator' | 'user'> {
+    const row = await this.db("system_admins")
+      .where({ user_id: userId, is_active: true })
+      .first();
+    return row ? row.access_level : 'user';
+  }  
+
   async promoteToAdmin(userId: string, level: 'super_admin' | 'moderator'): Promise<void> {
     const exists = await this.db("system_admins").where({ user_id: userId }).first();
     

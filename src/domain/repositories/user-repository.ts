@@ -5,6 +5,7 @@ export interface IUserRepository {
     save(user: User): Promise<void>;
     findById(id: string): Promise<User | null>;
     isAdmin(userId: string): Promise<boolean>;
+    getRoleAdmin(userId: string): Promise<'super_admin' | 'moderator' | 'user'>;
     promoteToAdmin(userId: string, level: 'super_admin' | 'moderator'): Promise<void>;
     findAll(): Promise<User[]>;
     updateStatus(userId: string, isActive: boolean): Promise<void>;

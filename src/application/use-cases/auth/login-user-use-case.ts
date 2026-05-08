@@ -28,11 +28,14 @@ export class LoginUserUseCase {
 
     const isAdmin = await this.userRepository.isAdmin(user.id);
 
+    const role = await this.userRepository.getRoleAdmin(user.id);
+
     return {
       id: user.id,
       name: user.name,
       email: user.email,
-      isAdmin
+      isAdmin,
+      role
     };
   }
 }
