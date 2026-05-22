@@ -11,6 +11,18 @@ export class UserRepository implements IUserRepository {
     return this.mapToEntity(row);
   }
 
+  async findByPhone(phone: string): Promise<User | null> {
+    const row = await this.db("users").where({ phone }).first();
+    if (!row) return null;
+    return this.mapToEntity(row);
+  }
+
+  async findByDocument(document: string): Promise<User | null> {
+    const row = await this.db("users").where({ document }).first();
+    if (!row) return null;
+    return this.mapToEntity(row);
+  }
+
   async findById(id: string): Promise<User | null> {
     const row = await this.db("users").where({ id }).first();
     if (!row) return null;
@@ -22,6 +34,8 @@ export class UserRepository implements IUserRepository {
       id: user.id,
       name: user.name,
       email: user.email,
+      phone: user.phone,
+      document: user.document,
       password: user.passwordHash,
       created_at: user.createdAt,
       is_active: user.isActive,
@@ -104,6 +118,8 @@ export class UserRepository implements IUserRepository {
       {
         name: row.name,
         email: row.email,
+        phone: row.phone,
+        document: row.document,
         passwordHash: row.password,
         isActive: row.is_active,
         emailConfirmed: row.email_confirmed,

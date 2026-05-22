@@ -98,6 +98,8 @@ export class UserController {
         id: userData.id,
         name: userData.name,
         email: userData.email,
+        phone: userData.phone,
+        document: userData.document,
         isAdmin,
         role
       });

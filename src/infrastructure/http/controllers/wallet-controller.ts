@@ -16,14 +16,16 @@ const depositSchema = z.object({
   }).optional(),
 });
 
+const confirmPixSchema = z.object({
+  amount: z.number().positive('O valor deve ser positivo'),
+  transactionId: z.string().min(1, 'ID da transação é obrigatório'),});
+
 const withdrawSchema = z.object({
   amount: z.number().positive('O valor deve ser positivo'),
   pixKey: z.string().min(1, 'Chave PIX é obrigatória'),
 });
 
 export class WalletController {
-  private pagarMeService = new PagarMeMockService();
-
   async getBalance(request: FastifyRequest, reply: FastifyReply) {
     try {
       const user = request.user as { id: string };
@@ -37,6 +39,8 @@ export class WalletController {
   }
 
   async deposit(request: FastifyRequest, reply: FastifyReply) {
+    const pagarMeService = new PagarMeMockService();
+
     try {
       const user = request.user as { id: string };
       const { amount, paymentMethod, cardData } = depositSchema.parse(request.body);
@@ -44,23 +48,23 @@ export class WalletController {
       let transactionResult;
 
       if (paymentMethod === 'pix') {
-        transactionResult = await this.pagarMeService.createTransactionPIX(
+        transactionResult = await pagarMeService.createTransactionPIX(
           amount,
           'Depósito na carteira Meu Bolão'
         );
 
         // For mock purposes, auto-approve PIX after creation
-        await this.pagarMeService.processWebhook({
+        /*await pagarMeService.processWebhook({
           id: transactionResult.transactionId,
           status: 'paid',
           amount,
           paymentMethod: 'pix',
-        });
+        });*/
       } else if (paymentMethod === 'card') {
         if (!cardData) {
           return reply.status(400).send({ message: 'Dados do cartão são obrigatórios para pagamento com cartão.' });
         }
-        transactionResult = await this.pagarMeService.createTransactionCard(amount, cardData);
+        transactionResult = await pagarMeService.createTransactionCard(amount, cardData);
       } else {
         return reply.status(400).send({ message: 'Método de pagamento inválido.' });
       }
@@ -68,7 +72,9 @@ export class WalletController {
       // Only credit wallet if payment was successful
       if (transactionResult.status === 'paid') {
         const walletRepo = new WalletRepository(db);
+
         await walletRepo.updateBalance(user.id, amount, 'credit');
+
         await walletRepo.createTransaction({
           userId: user.id,
           amount,
@@ -85,12 +91,51 @@ export class WalletController {
           success: true,
           transactionId: transactionResult.transactionId,
         });
+      } else if (transactionResult.status === 'pending') {
+        return reply.status(200).send({
+          message: 'Pagamento pendente. A carteira será atualizada assim que o pagamento for confirmado.',
+          success: true,
+          transactionId: transactionResult.transactionId,
+          transaction: transactionResult,
+        });
       }
 
       return reply.status(400).send({
         message: 'Pagamento não aprovado.',
         success: false,
         transactionId: transactionResult.transactionId,
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) return reply.status(400).send({ errors: JSON.parse(error.message) });
+
+      return reply.status(400).send({ message: error.message });
+    }
+  }
+
+  async confirmPix(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const user = request.user as { id: string };
+      const { amount, transactionId } = confirmPixSchema.parse(request.body);
+
+      const walletRepo = new WalletRepository(db);
+
+      await walletRepo.updateBalance(user.id, amount, 'credit');
+
+      await walletRepo.createTransaction({
+        userId: user.id,
+        amount,
+        type: 'credit',
+        category: 'deposit',
+        description: `Depósito via PIX - TX ${transactionId}`,
+      });
+
+      const balance = await walletRepo.getBalance(user.id);
+
+      return reply.status(200).send({
+        message: 'Depósito realizado com sucesso.',
+        balance,
+        success: true,
+        transactionId: transactionId,
       });
     } catch (error: any) {
       if (error instanceof z.ZodError) return reply.status(400).send({ errors: JSON.parse(error.message) });
@@ -107,7 +152,7 @@ export class WalletController {
       const walletRepo = new WalletRepository(db);
       const currentBalance = await walletRepo.getBalance(user.id);
 
-      if (currentBalance < amount) {
+      if (currentBalance && currentBalance < amount) {
         return reply.status(400).send({ message: 'Saldo insuficiente para saque.' });
       }
 

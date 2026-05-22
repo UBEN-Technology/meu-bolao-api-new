@@ -42,7 +42,7 @@ export class MatchRepository implements IMatchRepository {
     }, row.id));
   }
 
-  async listWithUserPredictions(championshipId: number, groupId: string, userId: string): Promise<any[]> {
+  async listWithUserPredictions(championshipId: number, groupId: string, userId: string): Promise<Match[]> {
     // LEFT JOIN para trazer a partida mesmo que o utilizador ainda não tenha palpitado
     const rawGroupId = this.db.raw("?", [groupId]);
     const rawUserId = this.db.raw("?", [userId]);
@@ -72,7 +72,22 @@ export class MatchRepository implements IMatchRepository {
       )
       .orderBy("m.match_date", "asc");
 
-    return rows;
+    return rows.map(row => new Match({
+      championshipId: row.championship_id,
+      homeTeamId: row.home_team_id,
+      awayTeamId: row.away_team_id,
+      matchDate: row.match_date,
+      homeScore: row.home_score,
+      awayScore: row.away_score,
+      status: row.status,
+      homeTeamName: row.home_team_name,
+      awayTeamName: row.away_team_name,
+      homeTeamBadge: row.home_team_badge,
+      awayTeamBadge: row.away_team_badge,
+      homeGuess: row.home_guess,
+      awayGuess: row.away_guess,
+      pointsEarned: row.points_earned
+    }, row.id));
   }
 
   async updateResult(matchId: number, homeScore: number, awayScore: number): Promise<void> {

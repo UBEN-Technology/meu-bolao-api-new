@@ -10,5 +10,6 @@ export async function adminChampionshipRoutes(app: FastifyInstance) {
   app.addHook('preHandler', checkAdmin);
 
   app.post('/', championshipController.createChampionship);
+  app.get('/:id', championshipController.findChampionship);
   app.post('/:id/finish', championshipController.finishChampionship);
 }

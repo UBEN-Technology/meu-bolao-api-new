@@ -163,16 +163,31 @@ export class GroupController {
       const { groupId } = groupIdParamsSchema.parse(request.params);
 
       const prizeRepo = new GroupPrizeRepository(db);
-      const prize = await prizeRepo.findByGroupId(groupId);
+      const groupRepo = new GroupRepository(db);
 
+      const group = await groupRepo.findById(groupId);
+      if (!group) {
+        return reply.status(404).send({ message: 'Grupo não encontrado.' });
+      }
+
+      const prize = await prizeRepo.findByGroupId(groupId);
       if (!prize) {
         return reply.status(200).send({});
       }
 
+      const totalMembers = await groupRepo.countMembers(groupId);
+      const total = totalMembers * group.entryFee;
+
       return reply.status(200).send({
-        firstPlacePct: prize.firstPlacePct,
-        secondPlacePct: prize.secondPlacePct,
-        thirdPlacePct: prize.thirdPlacePct,
+        total,
+        firstPlace: total * (prize.firstPlacePct / 100),
+        secondPlace: total * (prize.secondPlacePct / 100),
+        thirdPlace: total * (prize.thirdPlacePct / 100),
+        distribution: {
+          firstPlacePct: prize.firstPlacePct,
+          secondPlacePct: prize.secondPlacePct,
+          thirdPlacePct: prize.thirdPlacePct,
+        }
       });
     } catch (error: any) {
       if (error instanceof z.ZodError) return reply.status(400).send({ errors: JSON.parse(error.message) });

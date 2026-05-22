@@ -16,13 +16,13 @@ export class TeamController {
     try {
       const validatedData = createTeamSchema.parse(request.body);
   
-      const { name, badgeUrl, championshipId } = validatedData;
+      const { name, badgeUrl, championshipId, code, nacionality } = validatedData;
       
       if (!championshipId) {
         return reply.status(400).send({ message: "O ID do campeonato é obrigatório." });
       }
 
-      const team = await useCase.execute({ name, badgeUrl, championshipId });
+      const team = await useCase.execute({ name, badgeUrl, championshipId, code, nacionality });
 
       const user = request.user as { id: string };
       await logAction(user.id, `Criou a equipe de ID ${team.id}`);

@@ -30,12 +30,16 @@ const webhookSchema = z.object({
 });
 
 export class PaymentController {
-  private pagarMeService = new PagarMeMockService();
+  // private pagarMeService = new PagarMeMockService();
 
   async createPix(request: FastifyRequest, reply: FastifyReply) {
     try {
+      const pagarMeService = new PagarMeMockService();
+
+      console.log('Criando transação PIX com dados:', request.body);
       const { amount, description } = pixPaymentSchema.parse(request.body);
-      const transaction = await this.pagarMeService.createTransactionPIX(amount, description);
+      const transaction = await pagarMeService.createTransactionPIX(amount, description);
+      console.log({ transaction })
 
       return reply.status(201).send({
         success: true,
@@ -57,8 +61,11 @@ export class PaymentController {
 
   async createCard(request: FastifyRequest, reply: FastifyReply) {
     try {
+      const pagarMeService = new PagarMeMockService();
+      console.log('Criando transação com cartão com dados:', request.body);
+
       const { amount, cardData } = cardPaymentSchema.parse(request.body);
-      const transaction = await this.pagarMeService.createTransactionCard(amount, cardData);
+      const transaction = await pagarMeService.createTransactionCard(amount, cardData);
 
       return reply.status(201).send({
         success: true,
@@ -81,8 +88,10 @@ export class PaymentController {
 
   async getStatus(request: FastifyRequest, reply: FastifyReply) {
     try {
+      const pagarMeService = new PagarMeMockService();
+
       const { transactionId } = getStatusSchema.parse(request.params);
-      const status = await this.pagarMeService.getTransactionStatus(transactionId);
+      const status = await pagarMeService.getTransactionStatus(transactionId);
 
       return reply.status(200).send({
         success: true,
@@ -96,8 +105,10 @@ export class PaymentController {
 
   async processWebhook(request: FastifyRequest, reply: FastifyReply) {
     try {
+      const pagarMeService = new PagarMeMockService();
+
       const payload = webhookSchema.parse(request.body);
-      const result = await this.pagarMeService.processWebhook(payload);
+      const result = await pagarMeService.processWebhook(payload);
 
       return reply.status(200).send(result);
     } catch (error: any) {

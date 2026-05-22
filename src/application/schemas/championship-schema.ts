@@ -5,6 +5,10 @@ export const createChampionshipSchema = z.object({
   description: z.string(),
 });
 
+export const findChampionshipParams = z.object({
+  id: z.coerce.number().positive(),
+});
+
 export const finishChampionshipParams = z.object({
   id: z.string().regex(/^\d+$/).transform(Number),
 });

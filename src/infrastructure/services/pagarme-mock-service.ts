@@ -68,6 +68,8 @@ export class PagarMeMockService implements IPagarMeService {
     const pixQrCode = generatePixQrCode(transactionId, amount);
     const pixCopyPaste = pixQrCode;
 
+    console.log(`Criando transação PIX: ${transactionId}, valor: ${amount}, descrição: ${description}`);
+
     const transaction: PixTransaction = {
       transactionId,
       amount,

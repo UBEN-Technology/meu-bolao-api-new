@@ -3,6 +3,8 @@ import { z } from 'zod';
 export const createUserSchema = z.object({
   name: z.string(),
   email: z.email('E-mail inválido'),
+  phone: z.string().regex(/^(?:55)?(?:\(?\d{2}\)?\s?)?\d{5}-?\d{4}$/, 'Telefone inválido'),
+  document: z.string().regex(/^\d{11}$/, 'Documento inválido'),
   password: z.string().min(8, "Senha muito curta"),
 });
 

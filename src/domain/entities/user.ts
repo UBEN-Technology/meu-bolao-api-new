@@ -2,6 +2,8 @@ export class User {
   public readonly id: string;
   public name: string;
   public email: string;
+  public phone: string;
+  public document: string;
   public passwordHash: string;
   public createdAt: Date;
   public isActive: boolean;
@@ -13,6 +15,8 @@ export class User {
     props: {
       name: string;
       email: string;
+      phone: string;
+      document: string;
       passwordHash: string;
       isActive?: boolean;
       emailConfirmed?: boolean;
@@ -25,6 +29,8 @@ export class User {
     this.id = id;
     this.name = props.name;
     this.email = props.email;
+    this.phone = props.phone;
+    this.document = props.document;
     this.passwordHash = props.passwordHash;
     this.createdAt = createdAt || new Date();
     this.isActive = props.isActive ?? true;

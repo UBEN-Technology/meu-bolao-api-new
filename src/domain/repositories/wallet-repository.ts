@@ -1,5 +1,5 @@
 export interface IWalletRepository {
-  getBalance(userId: string): Promise<number>;
+  getBalance(userId: string): Promise<number | null>;
   updateBalance(userId: string, amount: number, type: 'credit' | 'debit'): Promise<void>;
   createTransaction(data: {
     userId: string;

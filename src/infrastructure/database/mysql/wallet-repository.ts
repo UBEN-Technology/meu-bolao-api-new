@@ -4,18 +4,26 @@ import { Knex } from "knex";
 export class WalletRepository implements IWalletRepository {
   constructor(private db: Knex) {}
 
-  async getBalance(userId: string): Promise<number> {
+  async getBalance(userId: string): Promise<number | null> {
     const row = await this.db("wallets").where({ user_id: userId }).first();
-    return row ? Number(row.balance) : 0;
+    return row ? Number(row.balance) : null;
   }
 
   async updateBalance(userId: string, amount: number, type: 'credit' | 'debit'): Promise<void> {
     const currentBalance = await this.getBalance(userId);
-    const newBalance = type === 'credit' ? currentBalance + amount : currentBalance - amount;
 
-    await this.db("wallets")
-      .where({ user_id: userId })
-      .update({ balance: newBalance });
+    if (currentBalance !== null) {
+      const newBalance = type === 'credit' ? currentBalance + amount : currentBalance - amount;
+  
+      await this.db("wallets")
+        .where({ user_id: userId })
+        .update({ balance: newBalance });
+    } else {
+      await this.db("wallets").insert({
+        user_id: userId,
+        balance: amount,
+      });
+    }
   }
 
   async createTransaction(data: any): Promise<void> {

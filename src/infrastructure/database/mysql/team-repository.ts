@@ -10,7 +10,9 @@ export class TeamRepository implements ITeamRepository {
       // 1. Inserir o time (ou recuperar se já existir pelo nome, dependendo da regra)
       const [teamId] = await trx("teams").insert({
         name: team.name,
-        badge_url: team.badgeUrl
+        badge_url: team.badgeUrl,
+        code: team.code,
+        nacionality: team.nacionality
       });
 
       // 2. Criar o vínculo com o campeonato
@@ -27,17 +29,17 @@ export class TeamRepository implements ITeamRepository {
       .where("ct.championship_id", championshipId)
       .select("t.*");
 
-    return rows.map(row => new Team({ name: row.name, badgeUrl: row.badge_url }, row.id));
+    return rows.map(row => new Team({ name: row.name, badgeUrl: row.badge_url, code: row.code, nacionality: row.nacionality }, row.id));
   }
 
   async findAll(): Promise<Team[]> {
     const rows = await this.db("teams");
-    return rows.map(row => new Team({ name: row.name, badgeUrl: row.badge_url }, row.id));
+    return rows.map(row => new Team({ name: row.name, badgeUrl: row.badge_url, code: row.code, nacionality: row.nacionality }, row.id));
   }
 
   async findById(id: number): Promise<Team | null> {
     const row = await this.db("teams").where({ id }).first();
     if (!row) return null;
-    return new Team({ name: row.name, badgeUrl: row.badge_url }, row.id);
+    return new Team({ name: row.name, badgeUrl: row.badge_url, code: row.code, nacionality: row.nacionality }, row.id);
   }
 }

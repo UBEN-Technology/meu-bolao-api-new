@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { db } from '../../database/connection';
 import { ChampionshipRepository, GroupRepository, PredictionRepository } from '@/infrastructure/database/mysql';
 import { CreateChampionshipUseCase, FinishChampionshipUseCase } from '@/application/use-cases';
-import { createChampionshipSchema, finishChampionshipParams } from '@/application/schemas';
+import { createChampionshipSchema, findChampionshipParams, finishChampionshipParams } from '@/application/schemas';
 import { logAction } from '../middlewares/log-action-middleware';
 
 export class ChampionshipController {
@@ -31,6 +31,15 @@ export class ChampionshipController {
   async listChampionships(request: FastifyRequest, reply: FastifyReply) {
     const championshipRepository = new ChampionshipRepository(db);
     const list = await championshipRepository.findAll();
+    return reply.status(200).send(list);
+  }
+
+  async findChampionship(request: FastifyRequest, reply: FastifyReply) {
+    const championshipRepository = new ChampionshipRepository(db);
+
+    const { id: championshipId } = findChampionshipParams.parse(request.params);
+
+    const list = await championshipRepository.findById(championshipId);
     return reply.status(200).send(list);
   }
 

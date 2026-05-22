@@ -9,6 +9,13 @@ export class Match {
   public homeScore?: number;
   public awayScore?: number;
   public status: MatchStatus;
+  public homeTeamName?: string | null;
+  public awayTeamName?: string | null;
+  public homeTeamBadge?: string | null;
+  public awayTeamBadge?: string | null;
+  public homeGuess?: number | null;
+  public awayGuess?: number | null;
+  public pointsEarned?: number | null;
 
   constructor(props: Omit<Match, "id">, id?: number) {
     this.id = id;
@@ -19,5 +26,12 @@ export class Match {
     this.homeScore = props.homeScore;
     this.awayScore = props.awayScore;
     this.status = props.status || 'scheduled';
+    this.homeTeamName = props.homeTeamName;
+    this.awayTeamName = props.awayTeamName;
+    this.homeTeamBadge = props.homeTeamBadge;
+    this.awayTeamBadge = props.awayTeamBadge;
+    this.homeGuess = props.homeGuess;
+    this.awayGuess = props.awayGuess;
+    this.pointsEarned = props.pointsEarned;
   }
 }

@@ -6,7 +6,7 @@ export const createGroupSchema = z.object({
   privacyType: z.enum(['public', 'private']),
   entryDeadline: z.coerce.date('Data do campo entryDeadline inválida'),
   maxMembers: z.coerce.number().positive().min(2),
-  entryFee: z.coerce.number().positive().min(0),
+  entryFee: z.coerce.number().min(0),
   hasPrize: z.coerce.boolean(),  
   prizes: z.object({
     firstPlacePct: z.number().min(0).max(100),
