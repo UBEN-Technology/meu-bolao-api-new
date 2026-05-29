@@ -8,6 +8,7 @@ export async function privateWalletRoutes(app: FastifyInstance) {
   app.addHook('preHandler', authenticate);
 
   app.get('/balance', walletController.getBalance);
+  app.get('/transactions', walletController.listTransactions);
   app.post('/deposit', walletController.deposit);
   app.post('/confirm-pix', walletController.confirmPix);
   app.post('/withdraw', walletController.withdraw);

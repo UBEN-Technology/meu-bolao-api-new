@@ -53,7 +53,7 @@ export class JoinGroupUseCase {
     if (group.entryFee > 0) {
       const balance = await this.walletRepository.getBalance(userId);
       
-      if (balance < group.entryFee) {
+      if (balance && balance < group.entryFee) {
         throw new Error("Saldo insuficiente na carteira para entrar neste grupo.");
       }
 

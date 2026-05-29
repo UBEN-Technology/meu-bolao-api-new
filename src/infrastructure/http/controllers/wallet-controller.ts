@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { db } from '../../database/connection';
 import { WalletRepository } from '@/infrastructure/database/mysql';
 import { PagarMeMockService } from '@/infrastructure/services/pagarme-mock-service';
+import { ListTransactionsUseCase } from '@/application/use-cases';
 
 const depositSchema = z.object({
   amount: z.number().positive('O valor deve ser positivo'),
@@ -23,6 +24,13 @@ const confirmPixSchema = z.object({
 const withdrawSchema = z.object({
   amount: z.number().positive('O valor deve ser positivo'),
   pixKey: z.string().min(1, 'Chave PIX é obrigatória'),
+});
+
+const listTransactionsQuerySchema = z.object({
+  type: z.enum(['credit', 'debit']).optional(),
+  category: z.enum(['deposit', 'withdraw', 'prize', 'entry_fee']).optional(),
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().positive().max(100).optional().default(20),
 });
 
 export class WalletController {
@@ -140,6 +148,28 @@ export class WalletController {
     } catch (error: any) {
       if (error instanceof z.ZodError) return reply.status(400).send({ errors: JSON.parse(error.message) });
 
+      return reply.status(400).send({ message: error.message });
+    }
+  }
+
+  async listTransactions(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const user = request.user as { id: string };
+      const { type, category, page, limit } = listTransactionsQuerySchema.parse(request.query);
+
+      const walletRepo = new WalletRepository(db);
+      const useCase = new ListTransactionsUseCase(walletRepo);
+
+      const result = await useCase.execute({ userId: user.id, type, category, page, limit });
+
+      return reply.status(200).send({
+        ...result,
+        page,
+        limit,
+        totalPages: Math.ceil(result.total / limit),
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) return reply.status(400).send({ errors: JSON.parse(error.message) });
       return reply.status(400).send({ message: error.message });
     }
   }

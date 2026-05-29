@@ -14,7 +14,7 @@ import {
   privateChampionshipRoutes,
   privateGroupRoutes,
   privateMatchRoutes,
-  privatePaymentRoutes,
+  // privatePaymentRoutes,
   privatePredictionRoutes,
   privateTeamRoutes,
   privateUserRoutes,
@@ -71,7 +71,7 @@ app.register(privateTeamRoutes, { prefix: '/teams' });
 app.register(privateChampionshipRoutes, { prefix: '/championships' });
 app.register(privateUserRoutes, { prefix: '/users' });
 app.register(privateWalletRoutes, { prefix: '/wallet' });
-app.register(privatePaymentRoutes, { prefix: '/payments' });
+// app.register(privatePaymentRoutes, { prefix: '/payments' });
 
 // ADMIN ROUTES
 app.register(adminUserRoutes, { prefix: '/admin/users' });

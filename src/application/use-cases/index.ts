@@ -6,3 +6,4 @@ export * from './group';
 export * from './match';
 export * from './prediction';
 export * from './audit-log';
+export * from './wallet';
