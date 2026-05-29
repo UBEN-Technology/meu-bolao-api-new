@@ -55,7 +55,7 @@ function generateTransactionId(): string {
 
 function generatePixQrCode(transactionId: string, amount: number): string {
   const value = amount.toFixed(2);
-  return `00020126580014BR.GOV.BCB.PIX2560api.pagarme.com/pix/v2/${transactionId}5204000053039865404${value}5802BR5925Meu Bolao6009SAO PAULO62070503***6304`;
+  return `00020126580014BR.GOV.BCB.PIX2560api.pagarme.com/pix/v2/${transactionId}5204000053039865404${value}5802BR5913Palpite Arena6009SAO PAULO62070503***6304`;
 }
 
 function maskCardNumber(number: string): string {

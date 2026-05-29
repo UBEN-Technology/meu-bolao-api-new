@@ -11,7 +11,7 @@ const start = async () => {
     });
 
     console.log(`
-    🎯 API Meu Bolão Iniciada!
+    🎯 API Palpite Arena Iniciada!
     🚀 URL: http://localhost:${port}
     🔑 Rotas Públicas: /users, /auth
     🛡️ Rotas Privadas: /championships, /teams, /groups, /users, /predictions, /wallet, /payments

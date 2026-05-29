@@ -2,6 +2,8 @@ import fastify from 'fastify';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import rateLimit from '@fastify/rate-limit';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 import { ENVS } from '@/utils';
 import {
   adminAuditLogsRoutes,
@@ -25,6 +27,55 @@ import {
 
 const app = fastify({ logger: true });
 
+app.register(swagger, {
+  openapi: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Palpite Arena API',
+      description: 'API para o sistema de palpites Palpite Arena — gerenciamento de grupos, palpites, carteira e administração.',
+      version: '1.0.0',
+    },
+    servers: [
+      { url: 'http://localhost:3333', description: 'Local' },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
+    tags: [
+      { name: 'Auth', description: 'Autenticação e gerenciamento de sessão' },
+      { name: 'Usuários', description: 'Cadastro e perfil do usuário' },
+      { name: 'Grupos', description: 'Criação, listagem e participação em grupos de bolão' },
+      { name: 'Palpites', description: 'Registro e atualização de palpites' },
+      { name: 'Partidas', description: 'Consulta de partidas' },
+      { name: 'Times', description: 'Consulta de times' },
+      { name: 'Campeonatos', description: 'Consulta de campeonatos' },
+      { name: 'Carteira', description: 'Saldo, depósito, saque e extrato de transações' },
+      { name: 'Admin — Usuários', description: 'Gestão de usuários (requer admin)' },
+      { name: 'Admin — Campeonatos', description: 'Gestão de campeonatos (requer admin)' },
+      { name: 'Admin — Times', description: 'Gestão de times (requer admin)' },
+      { name: 'Admin — Partidas', description: 'Gestão de partidas (requer admin)' },
+      { name: 'Admin — Grupos', description: 'Gestão de grupos (requer admin)' },
+      { name: 'Admin — Auditoria', description: 'Logs de auditoria (requer admin)' },
+      { name: 'Admin — Sync', description: 'Sincronização de dados externos (requer admin)' },
+    ],
+  },
+});
+
+app.register(swaggerUi, {
+  routePrefix: '/docs',
+  uiConfig: {
+    docExpansion: 'list',
+    deepLinking: true,
+    persistAuthorization: true,
+  },
+});
+
 app.register(cors, {
   origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
   credentials: true,
@@ -47,8 +98,10 @@ app.register(rateLimit, {
   })
 });
 
-// Helmet-like security headers
-app.addHook('onSend', async (_request, reply, payload) => {
+// Helmet-like security headers (skipped for Swagger UI)
+app.addHook('onSend', async (request, reply, payload) => {
+  if (request.url.startsWith('/docs')) return payload;
+
   reply.header('X-Content-Type-Options', 'nosniff');
   reply.header('X-Frame-Options', 'DENY');
   reply.header('X-XSS-Protection', '1; mode=block');

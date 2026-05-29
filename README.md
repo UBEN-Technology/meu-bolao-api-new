@@ -1,6 +1,6 @@
-# Meu Bolão — API
+# Palpite Arena — API
 
-API REST do **Meu Bolão**, uma plataforma de bolões esportivos com tema dark "Stadium Pulse" (inspirado no Betano).
+API REST do **Palpite Arena**, uma plataforma de bolões esportivos com tema dark "Stadium Pulse" (inspirado no Betano).
 
 ## 🚀 Tecnologias
 
@@ -25,7 +25,7 @@ API REST do **Meu Bolão**, uma plataforma de bolões esportivos com tema dark "
 
 ```bash
 git clone <url-do-repo>
-cd meu-bolao-api
+cd palpite-arena-api
 ```
 
 ### 2. Instale as dependências
@@ -39,9 +39,9 @@ yarn install
 ```bash
 # Crie o container MySQL
 docker run -d \
-  --name meu-bolao-mysql \
+  --name palpite-arena-mysql \
   -e MYSQL_ROOT_PASSWORD=root \
-  -e MYSQL_DATABASE=meu_bolao_db \
+  -e MYSQL_DATABASE=palpite_arena_db \
   -p 3306:3306 \
   mysql:8.0
 
@@ -49,8 +49,8 @@ docker run -d \
 sleep 30
 
 # Execute o schema e os seeds
-docker exec -i meu-bolao-mysql mysql -uroot -proot meu_bolao_db < schema.sql
-docker exec -i meu-bolao-mysql mysql -uroot -proot meu_bolao_db < seeds.sql
+docker exec -i palpite-arena-mysql mysql -uroot -proot palpite_arena_db < schema.sql
+docker exec -i palpite-arena-mysql mysql -uroot -proot palpite_arena_db < seeds.sql
 ```
 
 ### 4. Configure as variáveis de ambiente
@@ -59,14 +59,14 @@ Crie um arquivo `.env` na raiz do projeto:
 
 ```env
 PORT=3333
-JWT_SECRET=meu-bolao-secret-key
+JWT_SECRET=palpite-arena-secret-key
 
 # MySQL
 DB_HOST=localhost
 DB_PORT=3306
 DB_USER=root
 DB_PASSWORD=root
-DB_NAME=meu_bolao_db
+DB_NAME=palpite_arena_db
 
 # Pontuação
 EXACT_RESULT_POINTS=10
@@ -117,7 +117,7 @@ src/
 
 | Email | Senha | Admin |
 |-------|-------|-------|
-| `admin@meubolao.com` | `admin123` | ✅ |
+| `admin@palpitearena.com` | `admin123` | ✅ |
 | `joao@email.com` | `admin123` | ❌ |
 | `maria@email.com` | `admin123` | ❌ |
 | `pedro@email.com` | `admin123` | ❌ |
@@ -126,14 +126,14 @@ src/
 
 ```bash
 # Iniciar
-docker start meu-bolao-mysql
+docker start palpite-arena-mysql
 
 # Parar
-docker stop meu-bolao-mysql
+docker stop palpite-arena-mysql
 
 # Resetar banco (apaga tudo e recria)
-docker exec -i meu-bolao-mysql mysql -uroot -proot meu_bolao_db < schema.sql
-docker exec -i meu-bolao-mysql mysql -uroot -proot meu_bolao_db < seeds.sql
+docker exec -i palpite-arena-mysql mysql -uroot -proot palpite_arena_db < schema.sql
+docker exec -i palpite-arena-mysql mysql -uroot -proot palpite_arena_db < seeds.sql
 ```
 
 ## 📝 Licença

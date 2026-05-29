@@ -58,7 +58,7 @@ export class WalletController {
       if (paymentMethod === 'pix') {
         transactionResult = await pagarMeService.createTransactionPIX(
           amount,
-          'Depósito na carteira Meu Bolão'
+          'Depósito na carteira Palpite Arena'
         );
 
         // For mock purposes, auto-approve PIX after creation

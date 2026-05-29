@@ -3,11 +3,11 @@ version: '3.8'
 services:
   mysql:
     image: mysql:8.0
-    container_name: meu-bolao-mysql
+    container_name: palpite-arena-mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: meu_bolao_db
+      MYSQL_DATABASE: palpite_arena_db
     ports:
       - "3306:3306"
     volumes:
