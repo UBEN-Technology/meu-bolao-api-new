@@ -36,6 +36,7 @@ export class GroupController {
     const repo = new GroupRepository(db);
     const user = request.user as { id: string };
     const groups = await repo.listByUser(user.id);
+    console.log("Grupos encontrados para o usuário:", groups); // Log para depuração
     return reply.status(200).send(groups);
   }
 

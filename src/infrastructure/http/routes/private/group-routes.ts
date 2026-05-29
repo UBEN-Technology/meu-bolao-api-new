@@ -51,7 +51,25 @@ export async function privateGroupRoutes(app: FastifyInstance) {
       summary: 'Listar grupos públicos disponíveis',
       security: bearerAuth,
       response: {
-        200: { type: 'array', items: { type: 'object' } },
+        200: { 
+          type: 'array', 
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              ownerId: { type: 'string' },
+              championshipId: { type: 'number' },
+              title: { type: 'string' },
+              inviteCode: { type: 'string' },
+              privacyType: { type: 'string' },
+              entryDeadline: { type: 'string', format: 'date-time' },
+              maxMembers: { type: 'number' },
+              entryFee: { type: 'number' },
+              hasPrize: { type: 'boolean' },
+              isActive: { type: 'boolean' }
+            }
+          } 
+        },
         400: errorSchema,
       },
     },
@@ -63,7 +81,25 @@ export async function privateGroupRoutes(app: FastifyInstance) {
       summary: 'Listar meus grupos',
       security: bearerAuth,
       response: {
-        200: { type: 'array', items: { type: 'object' } },
+        200: { 
+          type: 'array', 
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              ownerId: { type: 'string' },
+              championshipId: { type: 'number' },
+              title: { type: 'string' },
+              inviteCode: { type: 'string' },
+              privacyType: { type: 'string' },
+              entryDeadline: { type: 'string', format: 'date-time' },
+              maxMembers: { type: 'number' },
+              entryFee: { type: 'number' },
+              hasPrize: { type: 'boolean' },
+              isActive: { type: 'boolean' }
+            }
+          } 
+        },
         400: errorSchema,
       },
     },
@@ -102,7 +138,15 @@ export async function privateGroupRoutes(app: FastifyInstance) {
         properties: { groupId: { type: 'string' } },
       },
       response: {
-        200: { type: 'array', items: { type: 'object' } },
+        200: { type: 'array', items: { 
+          type: 'object',
+          properties: {
+            userId: { type: 'string' },
+            userName: { type: 'string' },
+            points: { type: 'number' },
+            position: { type: 'number' }
+          }
+        } },
         400: errorSchema,
       },
     },
@@ -119,7 +163,16 @@ export async function privateGroupRoutes(app: FastifyInstance) {
         properties: { groupId: { type: 'string' } },
       },
       response: {
-        200: { type: 'array', items: { type: 'object' } },
+        200: { type: 'array', items: { type: 'object', properties: { 
+          matchId: { type: 'number' },
+          homeTeam: { type: 'string' },
+          awayTeam: { type: 'string' },
+          matchDate: { type: 'string', format: 'date-time' },
+          userPrediction: { type: 'object', properties: {
+            homeScore: { type: 'number' },
+            awayScore: { type: 'number' }
+          } }
+        } } },
         400: errorSchema,
       },
     },
@@ -136,7 +189,10 @@ export async function privateGroupRoutes(app: FastifyInstance) {
         properties: { groupId: { type: 'string' } },
       },
       response: {
-        200: { type: 'array', items: { type: 'object' } },
+        200: { type: 'array', items: { type: 'object', properties: { 
+          userId: { type: 'string' },
+          userName: { type: 'string' }
+        } } },
         400: errorSchema,
       },
     },

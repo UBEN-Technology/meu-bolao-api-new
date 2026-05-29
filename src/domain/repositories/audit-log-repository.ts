@@ -1,13 +1,14 @@
 import { AuditLog } from "../entities";
 
-export interface IAuditLogRepository {
-  /**
-   * Regista uma nova ação administrativa no log
-   */
-  create(log: AuditLog): Promise<void>;
+export interface AuditLogEntry {
+  id: number;
+  action: string;
+  executedAt: Date;
+  adminName: string;
+  adminEmail: string;
+}
 
-  /**
-   * Lista os logs mais recentes do sistema
-   */
-  findAll(): Promise<any[]>;
+export interface IAuditLogRepository {
+  create(log: AuditLog): Promise<void>;
+  findAll(): Promise<AuditLogEntry[]>;
 }

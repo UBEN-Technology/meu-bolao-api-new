@@ -21,7 +21,15 @@ export async function privateMatchRoutes(app: FastifyInstance) {
         properties: { championshipId: { type: 'number' } },
       },
       response: {
-        200: { type: 'array', items: { type: 'object' } },
+        200: { type: 'array', items: { type: 'object', properties: { 
+          id: { type: 'string' },
+          homeTeamId: { type: 'number' },
+          awayTeamId: { type: 'number' },
+          matchDate: { type: 'string', format: 'date-time' },
+          homeScore: { type: 'number' },
+          awayScore: { type: 'number' },
+          status: { type: 'string' },
+        } } },
         400: errorSchema,
       },
     },

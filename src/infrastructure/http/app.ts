@@ -77,7 +77,13 @@ app.register(swaggerUi, {
 });
 
 app.register(cors, {
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: [
+    'http://localhost:3000', 
+    'http://127.0.0.1:3000',
+    'http://localhost:8081',   // Expo Web dev
+    'http://localhost:19006',  // Expo Web alternativo    
+    'http://localhost:5173'    // Vite dev server
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']

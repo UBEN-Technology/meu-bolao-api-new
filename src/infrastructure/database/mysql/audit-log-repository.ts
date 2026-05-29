@@ -1,5 +1,5 @@
 import { AuditLog } from "@/domain/entities";
-import { IAuditLogRepository } from "@/domain/repositories";
+import { AuditLogEntry, IAuditLogRepository } from "@/domain/repositories";
 import { Knex } from "knex";
 
 export class AuditLogRepository implements IAuditLogRepository {
@@ -9,12 +9,12 @@ export class AuditLogRepository implements IAuditLogRepository {
     await this.db("admin_audit_logs").insert({
       admin_id: log.adminId,
       action: log.action,
-      executed_at: log.executedAt
+      executed_at: log.executedAt,
     });
   }
 
-  async findAll(): Promise<any[]> {
-    return await this.db("admin_audit_logs as l")
+  async findAll(): Promise<AuditLogEntry[]> {
+    const rows = await this.db("admin_audit_logs as l")
       .join("users as u", "l.admin_id", "u.id")
       .select(
         "l.id",
@@ -24,5 +24,13 @@ export class AuditLogRepository implements IAuditLogRepository {
         "u.email as admin_email"
       )
       .orderBy("l.executed_at", "desc");
+
+    return rows.map(row => ({
+      id: Number(row.id),
+      action: String(row.action),
+      executedAt: new Date(row.executed_at),
+      adminName: String(row.admin_name),
+      adminEmail: String(row.admin_email),
+    }));
   }
 }

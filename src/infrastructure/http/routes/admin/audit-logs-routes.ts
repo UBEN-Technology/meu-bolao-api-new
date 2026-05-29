@@ -29,7 +29,12 @@ export async function adminAuditLogsRoutes(app: FastifyInstance) {
         200: {
           type: 'object',
           properties: {
-            logs: { type: 'array', items: { type: 'object' } },
+            logs: { type: 'array', items: { type: 'object', properties: { 
+              id: { type: 'string' },
+              userId: { type: 'string' },
+              action: { type: 'string' },
+              timestamp: { type: 'string', format: 'date-time' }
+            } } },
             total: { type: 'number' },
           },
         },

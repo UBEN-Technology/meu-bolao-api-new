@@ -60,7 +60,7 @@ export async function adminChampionshipRoutes(app: FastifyInstance) {
       params: {
         type: 'object',
         required: ['id'],
-        properties: { id: { type: 'number' } },
+        properties: { id: { type: 'number' }, tittle: { type: 'string' }, description: { type: 'string' }, status: { type: 'string' } },
       },
       response: {
         200: { type: 'object', properties: { message: { type: 'string' } } },

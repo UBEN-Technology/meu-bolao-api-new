@@ -34,6 +34,9 @@ export class LoginUserUseCase {
       id: user.id,
       name: user.name,
       email: user.email,
+      phone: user.phone,
+      document: user.document,
+      createdAt: user.createdAt,
       isAdmin,
       role
     };

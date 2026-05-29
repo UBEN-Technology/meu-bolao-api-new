@@ -21,7 +21,12 @@ export async function privateTeamRoutes(app: FastifyInstance) {
         properties: { championshipId: { type: 'number' } },
       },
       response: {
-        200: { type: 'array', items: { type: 'object' } },
+        200: { type: 'array', items: { type: 'object', properties: { 
+          id: { type: 'string' },
+          name: { type: 'string' },
+          badgeUrl: { type: 'string' },
+          nacionality: { type: 'string' },
+        } } },
         400: errorSchema,
       },
     },

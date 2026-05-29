@@ -94,6 +94,18 @@ export class UserController {
       const isAdmin = await repo.isAdmin(user.id);
       const role = await repo.getRoleAdmin(user.id);
 
+      console.log(`Usuário ${userData.email} acessou seu perfil. Admin: ${isAdmin}, Role: ${role}`, { userData });
+
+      console.log({
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        document: userData.document,
+        isAdmin,
+        role
+      })
+
       return reply.status(200).send({
         id: userData.id,
         name: userData.name,

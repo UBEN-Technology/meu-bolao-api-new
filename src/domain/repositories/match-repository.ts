@@ -11,5 +11,5 @@ export interface IMatchRepository {
     championshipId: number,
     groupId: string,
     userId: string
-  ): Promise<any[]>;
+  ): Promise<Match[]>;
 }

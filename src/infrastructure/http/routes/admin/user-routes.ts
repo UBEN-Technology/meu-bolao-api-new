@@ -17,7 +17,15 @@ export async function adminUserRoutes(app: FastifyInstance) {
       summary: 'Listar todos os usuários',
       security: bearerAuth,
       response: {
-        200: { type: 'array', items: { type: 'object' } },
+        200: { type: 'array', items: { type: 'object', properties: { 
+          id: { type: 'string' },
+          email: { type: 'string' },
+          name: { type: 'string' },
+          phone: { type: 'string' },
+          document: { type: 'string' },
+          createdAt: { type: 'string' },
+          isAdmin: { type: 'boolean' }
+        } } },
         403: errorSchema,
       },
     },

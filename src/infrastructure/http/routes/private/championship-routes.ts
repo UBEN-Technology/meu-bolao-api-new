@@ -16,7 +16,12 @@ export async function privateChampionshipRoutes(app: FastifyInstance) {
       summary: 'Listar campeonatos disponíveis',
       security: bearerAuth,
       response: {
-        200: { type: 'array', items: { type: 'object' } },
+        200: { type: 'array', items: { type: 'object', properties: { 
+          id: { type: 'string' },
+          title: { type: 'string' },
+          description: { type: 'string' },
+          status: { type: 'string' },          
+        } } },
         400: errorSchema,
       },
     },
