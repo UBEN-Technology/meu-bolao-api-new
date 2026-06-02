@@ -10,3 +10,4 @@ export * from './group-prize-repository';
 export * from './token-blacklist-repository';
 export * from './password-reset-token-repository';
 export * from './email-confirmation-token-repository';
+export * from './payment-transaction-repository';

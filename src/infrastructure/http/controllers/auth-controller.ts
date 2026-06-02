@@ -5,7 +5,7 @@ import { db } from '../../database/connection';
 import { UserRepository, TokenBlacklistRepository, PasswordResetTokenRepository, EmailConfirmationTokenRepository } from '@/infrastructure/database/mysql';
 import { LoginUserUseCase } from '@/application/use-cases';
 import { loginSchema } from '@/application/schemas';
-import { EmailMockService } from '@/infrastructure/services/email-mock-service';
+import { ResendEmailService } from '@/infrastructure/services/resend-email-service';
 
 const refreshSchema = z.object({
   refreshToken: z.string().optional(),
@@ -122,7 +122,7 @@ export class AuthController {
       const { email } = forgotPasswordSchema.parse(request.body);
       const userRepository = new UserRepository(db);
       const resetTokenRepo = new PasswordResetTokenRepository(db);
-      const emailService = new EmailMockService();
+      const emailService = new ResendEmailService();
 
       const user = await userRepository.findByEmail(email);
       if (!user) {
@@ -225,7 +225,7 @@ export class AuthController {
       const { email } = resendConfirmationSchema.parse(request.body);
       const userRepository = new UserRepository(db);
       const confirmationRepo = new EmailConfirmationTokenRepository(db);
-      const emailService = new EmailMockService();
+      const emailService = new ResendEmailService();
 
       const user = await userRepository.findByEmail(email);
       if (!user) {

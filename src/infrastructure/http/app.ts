@@ -23,6 +23,7 @@ import {
   privateWalletRoutes,
   publicAuthRoutes,
   publicUserRoutes,
+  webhookRoutes,
 } from './routes';
 
 const app = fastify({ logger: true });
@@ -145,8 +146,6 @@ app.get('/health', async () => {
   return { status: 'OK', timestamp: new Date().toISOString() };
 });
 
-app.get('/webhooks/pagarme', async (_request, reply) => {
-  return reply.status(200).send({ message: 'Webhook endpoint disponível para POST.' });
-});
+app.register(webhookRoutes, { prefix: '/webhooks' });
 
 export { app };

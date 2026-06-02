@@ -22,5 +22,17 @@ export const ENVS = {
 
   PRIZES: {
     TOTAL: Number(process.env.TOTAL_PRIZE) || 100,
-  }
+  },
+
+  PAGARME: {
+    API_KEY: process.env.PAGARME_API_KEY || '',
+    WEBHOOK_SECRET: process.env.PAGARME_WEBHOOK_SECRET || '',
+  },
+
+  RESEND: {
+    API_KEY: process.env.RESEND_API_KEY || '',
+    FROM_EMAIL: process.env.RESEND_FROM_EMAIL || 'noreply@meubolao.com',
+  },
+
+  FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
 };

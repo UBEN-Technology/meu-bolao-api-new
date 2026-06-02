@@ -2,7 +2,9 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { db } from '../../database/connection';
 import { WalletRepository } from '@/infrastructure/database/mysql';
-import { PagarMeMockService } from '@/infrastructure/services/pagarme-mock-service';
+import { PagarMeService } from '@/infrastructure/services/pagarme-service';
+import { PaymentTransactionRepository } from '@/infrastructure/database/mysql/payment-transaction-repository';
+import { ResendEmailService } from '@/infrastructure/services/resend-email-service';
 import { ListTransactionsUseCase } from '@/application/use-cases';
 
 const depositSchema = z.object({
@@ -47,42 +49,57 @@ export class WalletController {
   }
 
   async deposit(request: FastifyRequest, reply: FastifyReply) {
-    const pagarMeService = new PagarMeMockService();
+    const pagarMeService = new PagarMeService();
 
     try {
-      const user = request.user as { id: string };
+      const authUser = request.user as { id: string };
+      const userRepository = new (await import('@/infrastructure/database/mysql/user-repository')).UserRepository(db);
+      const user = await userRepository.findById(authUser.id);
+      if (!user) {
+        return reply.status(401).send({ message: 'Utilizador não encontrado.' });
+      }
+
       const { amount, paymentMethod, cardData } = depositSchema.parse(request.body);
 
       let transactionResult;
+      const customer = {
+        name: user.name,
+        email: user.email,
+        document: user.document || '00000000000',
+      };
 
       if (paymentMethod === 'pix') {
         transactionResult = await pagarMeService.createTransactionPIX(
           amount,
-          'Depósito na carteira Palpite Arena'
+          'Depósito na carteira Palpite Arena',
+          customer
         );
-
-        // For mock purposes, auto-approve PIX after creation
-        /*await pagarMeService.processWebhook({
-          id: transactionResult.transactionId,
-          status: 'paid',
-          amount,
-          paymentMethod: 'pix',
-        });*/
       } else if (paymentMethod === 'card') {
         if (!cardData) {
           return reply.status(400).send({ message: 'Dados do cartão são obrigatórios para pagamento com cartão.' });
         }
-        transactionResult = await pagarMeService.createTransactionCard(amount, cardData);
+        transactionResult = await pagarMeService.createTransactionCard(amount, cardData, customer);
       } else {
         return reply.status(400).send({ message: 'Método de pagamento inválido.' });
       }
 
-      // Only credit wallet if payment was successful
+      const paymentTransactionRepo = new PaymentTransactionRepository(db);
+      await paymentTransactionRepo.create({
+        id: transactionResult.transactionId,
+        user_id: user.id,
+        provider_order_id: transactionResult.providerOrderId || transactionResult.transactionId,
+        amount,
+        status: transactionResult.status === 'paid' ? 'paid' : 'pending',
+        payment_method: paymentMethod as 'pix' | 'card',
+        metadata: paymentMethod === 'pix'
+          ? { qr_code: transactionResult.pixQrCode, copy_paste: transactionResult.pixCopyPaste }
+          : { card_last_four: (transactionResult as any).cardLastFour },
+      });
+
+      // Credit wallet if card was approved immediately
       if (transactionResult.status === 'paid') {
         const walletRepo = new WalletRepository(db);
-
         await walletRepo.updateBalance(user.id, amount, 'credit');
-
         await walletRepo.createTransaction({
           userId: user.id,
           amount,
@@ -90,7 +107,6 @@ export class WalletController {
           category: 'deposit',
           description: `Depósito via ${paymentMethod.toUpperCase()} - TX ${transactionResult.transactionId}`,
         });
-
         const balance = await walletRepo.getBalance(user.id);
 
         return reply.status(200).send({
@@ -115,20 +131,34 @@ export class WalletController {
       });
     } catch (error: any) {
       if (error instanceof z.ZodError) return reply.status(400).send({ errors: JSON.parse(error.message) });
-
       return reply.status(400).send({ message: error.message });
     }
   }
 
   async confirmPix(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const user = request.user as { id: string };
+      const authUser = request.user as { id: string };
+      const userRepository = new (await import('@/infrastructure/database/mysql/user-repository')).UserRepository(db);
+      const user = await userRepository.findById(authUser.id);
+      if (!user) {
+        return reply.status(401).send({ message: 'Utilizador não encontrado.' });
+      }
+
       const { amount, transactionId } = confirmPixSchema.parse(request.body);
 
+      const paymentTransactionRepo = new PaymentTransactionRepository(db);
+      const tx = await paymentTransactionRepo.findPendingByUserAndId(user.id, transactionId);
+
+      if (!tx) {
+        return reply.status(400).send({ message: 'Transação não encontrada ou já processada.' });
+      }
+
+      if (tx.status === 'paid') {
+        return reply.status(400).send({ message: 'Transação já foi confirmada anteriormente.' });
+      }
+
       const walletRepo = new WalletRepository(db);
-
       await walletRepo.updateBalance(user.id, amount, 'credit');
-
       await walletRepo.createTransaction({
         userId: user.id,
         amount,
@@ -136,6 +166,22 @@ export class WalletController {
         category: 'deposit',
         description: `Depósito via PIX - TX ${transactionId}`,
       });
+
+      await paymentTransactionRepo.updateStatus(transactionId, 'paid');
+
+      // Enviar recibo de depósito
+      const emailService = new ResendEmailService();
+      try {
+        const balance = await walletRepo.getBalance(user.id);
+        await emailService.sendDepositReceipt(user.email, {
+          amount,
+          transactionId,
+          balance,
+          date: new Date(),
+        });
+      } catch (err) {
+        console.error('[confirmPix] Falha ao enviar email:', err);
+      }
 
       const balance = await walletRepo.getBalance(user.id);
 
@@ -147,7 +193,6 @@ export class WalletController {
       });
     } catch (error: any) {
       if (error instanceof z.ZodError) return reply.status(400).send({ errors: JSON.parse(error.message) });
-
       return reply.status(400).send({ message: error.message });
     }
   }
@@ -176,7 +221,13 @@ export class WalletController {
 
   async withdraw(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const user = request.user as { id: string };
+      const authUser = request.user as { id: string };
+      const userRepository = new (await import('@/infrastructure/database/mysql/user-repository')).UserRepository(db);
+      const user = await userRepository.findById(authUser.id);
+      if (!user) {
+        return reply.status(401).send({ message: 'Utilizador não encontrado.' });
+      }
+
       const { amount, pixKey } = withdrawSchema.parse(request.body);
 
       const walletRepo = new WalletRepository(db);
@@ -197,6 +248,19 @@ export class WalletController {
 
       const balance = await walletRepo.getBalance(user.id);
 
+      // Enviar recibo de saque
+      const emailService = new ResendEmailService();
+      try {
+        await emailService.sendWithdrawalReceipt(user.email, {
+          amount,
+          pixKey,
+          balance,
+          date: new Date(),
+        });
+      } catch (err) {
+        console.error('[withdraw] Falha ao enviar email:', err);
+      }
+
       return reply.status(200).send({
         message: 'Saque solicitado com sucesso.',
         balance,
@@ -204,7 +268,6 @@ export class WalletController {
       });
     } catch (error: any) {
       if (error instanceof z.ZodError) return reply.status(400).send({ errors: JSON.parse(error.message) });
-
       return reply.status(400).send({ message: error.message });
     }
   }

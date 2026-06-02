@@ -14,6 +14,7 @@ export interface PixTransaction {
   pixQrCode: string;
   pixCopyPaste: string;
   expiresAt: Date;
+  providerOrderId?: string;
 }
 
 export interface CardTransaction {
@@ -22,6 +23,7 @@ export interface CardTransaction {
   status: 'pending' | 'paid' | 'failed';
   cardLastFour: string;
   processedAt: Date;
+  providerOrderId?: string;
 }
 
 export interface TransactionStatus {
@@ -40,10 +42,10 @@ export interface WebhookPayload {
 }
 
 export interface IPagarMeService {
-  createTransactionPIX(amount: number, description: string): Promise<PixTransaction>;
-  createTransactionCard(amount: number, cardData: CardData): Promise<CardTransaction>;
+  createTransactionPIX(amount: number, description: string, customer?: { name: string; email: string; document: string }): Promise<PixTransaction>;
+  createTransactionCard(amount: number, cardData: CardData, customer?: { name: string; email: string; document: string }): Promise<CardTransaction>;
   getTransactionStatus(transactionId: string): Promise<TransactionStatus>;
-  processWebhook(payload: WebhookPayload): Promise<{ success: boolean; message: string }>;
+  processWebhook(payload: WebhookPayload, signatureHeader?: string): Promise<{ success: boolean; message: string }>;
 }
 
 // In-memory store for mock transactions
@@ -63,7 +65,7 @@ function maskCardNumber(number: string): string {
 }
 
 export class PagarMeMockService implements IPagarMeService {
-  async createTransactionPIX(amount: number, description: string): Promise<PixTransaction> {
+  async createTransactionPIX(amount: number, description: string, _customer?: any): Promise<PixTransaction> {
     const transactionId = generateTransactionId();
     const pixQrCode = generatePixQrCode(transactionId, amount);
     const pixCopyPaste = pixQrCode;
@@ -84,7 +86,7 @@ export class PagarMeMockService implements IPagarMeService {
     return transaction;
   }
 
-  async createTransactionCard(amount: number, cardData: CardData): Promise<CardTransaction> {
+  async createTransactionCard(amount: number, cardData: CardData, _customer?: any): Promise<CardTransaction> {
     const transactionId = generateTransactionId();
 
     // Simulate card validation
@@ -125,7 +127,7 @@ export class PagarMeMockService implements IPagarMeService {
     };
   }
 
-  async processWebhook(payload: WebhookPayload): Promise<{ success: boolean; message: string }> {
+  async processWebhook(payload: WebhookPayload, _signatureHeader?: string): Promise<{ success: boolean; message: string }> {
     const transaction = transactionsStore.get(payload.id);
 
     if (!transaction) {
